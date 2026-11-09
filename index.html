@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تخمین خونریزی حین عمل و محاسبه ABL — درس گام‌به‌گام</title>
+<style>
+  /* فونت اختصاصی از مخزن گیت‌هاب */
+  @font-face{
+    font-family:'IRANYekanXVFaNum';
+    src:url('https://raw.githubusercontent.com/mehajinezhad/ECG_Axis_Interpretation/main/IRANYekanXVFaNumVF.ttf') format('truetype');
+    font-weight:normal;
+    font-style:normal;
+    font-display:swap;
+  }
+
+  :root{
+    --bg:#eef3f8;
+    --card:#ffffff;
+    --ink:#16283a;
+    --muted:#5b6b7c;
+    --line:#d9e4ee;
+    --brand:#0f6e8c;
+    --brand-dark:#0b5b74;
+    --brand2:#008080;
+    --ok:#1a7f52;
+    --okbg:#e9f8f0;
+    --bad:#c0392b;
+    --badbg:#fdecea;
+    --soft:#f7fafc;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'IRANYekanXVFaNum', "Vazirmatn", "IRANSans", "Segoe UI", Tahoma, "Iranian Sans", sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.95;
+    font-size:16px;
+    -webkit-text-size-adjust:100%;
+  }
+  h1,h2,h3,h4{margin:0 0 10px;line-height:1.6}
+  h1{font-size:1.28em}
+  h2{font-size:1.15em}
+  h3{font-size:1.02em}
+  p{margin:0 0 10px}
+  ul,ol{margin:0 0 10px;padding-right:22px}
+  li{margin-bottom:6px}
+  strong{font-weight:800}
+  .wrap{max-width:940px;margin:0 auto;padding:0 14px 60px}
+
+  /* ---------- عنوان بزرگ بالای صفحه ---------- */
+  .page-title-banner{
+    max-width:940px;margin:16px auto 0;padding:0 14px;
+  }
+  .page-title-banner .banner-inner{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(135deg,#0f6e8c,#008080);
+    color:#fff;
+    border-radius:18px;
+    padding:22px 24px 20px;
+    box-shadow:0 8px 28px rgba(15,110,140,.28);
+    text-align:center;
+  }
+  .page-title-banner .banner-inner h1{
+    position:relative;
+    z-index:1;
+    font-size:1.75em;
+    font-weight:800;
+    letter-spacing:.3px;
+    margin:0 0 6px;
+    line-height:1.5;
+  }
+  .page-title-banner .banner-inner p{
+    position:relative;
+    z-index:1;
+    margin:0;
+    font-size:.92em;
+    opacity:.92;
+  }
+  .banner-symbol{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:200px;
+    height:auto;
+    opacity:0.16;
+    pointer-events:none;
+    z-index:0;
+  }
+  @media (max-width:640px){
+    .banner-symbol{
+      width:150px;
+      opacity:0.13;
+    }
+  }
+
+  /* ---------- نوار بالا ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:60;
+    background:rgba(255,255,255,.97);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 2px 12px rgba(16,40,70,.06);
+    padding:9px 0;
+  }
+  .topbar-inner{
+    max-width:940px;margin:0 auto;padding:0 14px;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+  .topbar-title{font-weight:800;font-size:.92em;color:var(--brand-dark);white-space:nowrap}
+  .progress{flex:1;min-width:120px;height:10px;background:#e3ecf3;border-radius:999px;overflow:hidden}
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#0f6e8c,#008080);transition:width .45s ease}
+  .pct{font-size:.82em;color:var(--muted);min-width:52px;text-align:left;font-variant-numeric:tabular-nums}
+
+  /* ---------- کارت‌ها ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px 16px 18px;
+    margin:16px 0;
+    box-shadow:0 3px 14px rgba(16,40,70,.055);
+  }
+  .hero{
+    background:linear-gradient(160deg,#ffffff 0%,#f2f9fc 100%);
+    border:1px solid #cfe3ec;
+  }
+  .step-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .step{
+    flex:0 0 auto;
+    display:inline-flex;align-items:center;justify-content:center;
+    width:36px;height:36px;border-radius:11px;
+    background:linear-gradient(145deg,#0f6e8c,#008080);
+    color:#fff;font-weight:800;font-size:.95em;
+    box-shadow:0 3px 8px rgba(15,110,140,.28);
+  }
+  .step-title{font-size:1.06em;font-weight:800;margin:0}
+
+  .tag{
+    display:inline-block;
+    background:#e8f4f8;color:#0b5b74;
+    border:1px solid #bfdbe6;
+    border-radius:999px;
+    padding:2px 11px;font-size:.78em;font-weight:700;
+    margin:0 0 8px;
+  }
+  .note{
+    background:#fff8e8;border:1px solid #f0dcae;border-radius:12px;
+    padding:10px 13px;font-size:.9em;color:#6b5314;margin:10px 0;
+  }
+  .note b{color:#5a4410}
+
+  /* ---------- کارت سخن سر ویلیام اوسلر ---------- */
+  .osler-card{
+    position:relative;
+    background:linear-gradient(135deg,#fffaf0 0%,#fef5e0 100%);
+    border:1px solid #f0e0bc;
+    border-radius:16px;
+    padding:22px 26px 18px;
+    margin:16px 0;
+    overflow:hidden;
+    box-shadow:0 4px 18px rgba(180,140,60,.13);
+  }
+  .osler-card .quote-mark{
+    position:absolute;
+    top:-28px;
+    left:8px;
+    font-family:Georgia, 'Times New Roman', serif;
+    font-size:120px;
+    line-height:1;
+    color:rgba(190,150,70,.16);
+    pointer-events:none;
+    user-select:none;
+  }
+  .osler-card .osler-text{
+    direction:ltr;
+    text-align:left;
+    font-family:Georgia, 'Times New Roman', serif;
+    font-style:italic;
+    font-size:1.02em;
+    line-height:1.8;
+    color:#5a4a2a;
+    margin:0 0 12px;
+    position:relative;
+    z-index:1;
+  }
+  .osler-card .osler-translation{
+    direction:rtl;
+    text-align:right;
+    font-size:.95em;
+    color:#7a6440;
+    margin:0 0 10px;
+    padding:10px 12px;
+    background:rgba(255,255,255,.6);
+    border-right:3px solid #c9a55a;
+    border-radius:0 8px 8px 0;
+    line-height:1.9;
+    position:relative;
+    z-index:1;
+  }
+  .osler-card .osler-author{
+    direction:rtl;
+    text-align:left;
+    font-size:.92em;
+    color:#8a7550;
+    font-weight:700;
+    position:relative;
+    z-index:1;
+    margin-top:6px;
+  }
+
+  /* ---------- فرمول ---------- */
+  .formula{
+    direction:ltr;text-align:center;
+    font-family:"Cambria Math","Times New Roman",Georgia,serif;
+    background:var(--soft);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 10px;margin:12px 0;
+    font-size:1.02em;letter-spacing:.2px;
+    overflow-x:auto;
+  }
+  .formula .lbl{font-family:inherit;font-size:.8em;color:var(--muted);display:block;margin-top:6px;direction:rtl}
+
+  /* ---------- پرسش‌ها ---------- */
+  .quiz{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
+  .qtext{font-weight:800;margin-bottom:6px}
+  .opt{
+    display:block;width:100%;text-align:right;
+    background:#f8fbfd;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:11px 14px;margin:8px 0;
+    font:inherit;color:inherit;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .06s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--brand);background:#eef7fb}
+  .opt:active:not(:disabled){transform:scale(.995)}
+  .opt:disabled{cursor:default;opacity:1}
+  .opt.ok{background:var(--okbg);border-color:var(--ok);color:#0e5537;font-weight:700}
+  .opt.bad{background:var(--badbg);border-color:var(--bad);color:#8d2a20}
+  .opt .mark{font-weight:800;margin-left:6px}
+
+  .fb{
+    margin-top:12px;padding:12px 14px;border-radius:12px;
+    border-right:5px solid var(--brand);
+    background:#f2f9fc;font-size:.96em;
+  }
+  .fb.ok{border-right-color:var(--ok);background:var(--okbg)}
+  .fb.bad{border-right-color:var(--bad);background:var(--badbg)}
+  .fb[hidden]{display:none}
+
+  /* ---------- فرم و ماشین‌حساب ---------- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:640px){.grid2{grid-template-columns:1fr}}
+  .field-wrap{margin-bottom:10px}
+  label.field{display:block;font-size:.86em;color:var(--muted);margin-bottom:5px;font-weight:600}
+  input[type=number],input[type=text],select{
+    width:100%;padding:10px 12px;
+    border:1.5px solid var(--line);border-radius:11px;
+    font:inherit;background:#fff;color:inherit;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  input:focus,select:focus{
+    outline:none;border-color:var(--brand);
+    box-shadow:0 0 0 3px rgba(15,110,140,.13);
+  }
+  input:disabled,select:disabled{background:#f1f5f9;color:#5b6b7c}
+  .btn{
+    display:inline-block;
+    background:var(--brand);color:#fff;border:none;
+    border-radius:12px;padding:11px 22px;
+    font:inherit;font-weight:700;cursor:pointer;
+    box-shadow:0 3px 10px rgba(15,110,140,.25);
+    transition:background .15s,transform .06s;
+  }
+  .btn:hover{background:var(--brand-dark)}
+  .btn:active{transform:scale(.985)}
+  .btn:disabled{background:#9db8c4;box-shadow:none;cursor:default}
+  .btn.ghost{
+    background:#eef3f8;color:var(--brand-dark);
+    box-shadow:none;border:1.5px solid var(--line);
+  }
+  .btn.ghost:hover{background:#e2ecf3}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+  .result{
+    margin-top:14px;padding:14px;border-radius:13px;
+    background:#f0f7fa;border:1px dashed #a9cddc;
+    font-size:.95em;
+  }
+  .result[hidden]{display:none}
+  .result .big{
+    display:block;font-size:1.55em;font-weight:800;
+    color:var(--brand-dark);margin:4px 0 8px;
+    font-variant-numeric:tabular-nums;
+  }
+  .result .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted #c9dde6;padding:5px 0}
+  .result .row:last-of-type{border-bottom:none}
+  .result .row span:last-child{font-variant-numeric:tabular-nums;font-weight:700;direction:ltr}
+  .warn{color:var(--bad);font-weight:700}
+
+  /* ---------- نوار قلب ---------- */
+  .ecg-wrap{
+    background:#fff;border:1px solid #eddde0;
+    border-radius:14px;overflow:hidden;margin:14px 0;
+    box-shadow:0 2px 8px rgba(160,60,80,.06);
+  }
+  .ecg-svg{display:block;width:100%;height:auto}
+  .ecg-cap{
+    font-size:.78em;color:#8a6a70;padding:6px 12px;text-align:center;
+    background:#fffbfb;border-top:1px solid #f2e6e8;
+  }
+
+  /* ---------- سایر ---------- */
+  .badge-line{
+    display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px;
+  }
+  .badge{
+    background:#eaf5f9;border:1px solid #c6e0ea;color:#0b5b74;
+    border-radius:999px;padding:3px 12px;font-size:.8em;font-weight:700;
+  }
+  .badge.green{background:#e8f7f0;border-color:#bfe6d5;color:#0e6b48}
+  .badge.red{background:#fdecea;border-color:#f3c3bb;color:#9d2c20}
+
+  .divider{
+    height:1px;background:linear-gradient(90deg,transparent,#cfe0ea,transparent);
+    margin:22px 0;
+  }
+  footer{
+    text-align:center;font-size:.82em;color:var(--muted);
+    padding:26px 14px 40px;
+  }
+  .kbd{
+    display:inline-block;background:#eef3f8;border:1px solid var(--line);
+    border-radius:6px;padding:0 7px;font-size:.85em;direction:ltr;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- QR sidebar (left) ---------- */
+  .qr-sidebar{
+    position:fixed;
+    left:8px;
+    top:100px;
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    background:rgba(255,255,255,.97);
+    border:1px solid #cfdde8;
+    border-radius:14px;
+    padding:8px 6px 8px;
+    box-shadow:0 4px 18px rgba(16,40,70,.15);
+    width:132px;
+  }
+  .qr-sidebar .avatar{
+    width:116px;height:116px;
+    border-radius:12px;
+    object-fit:cover;
+    display:block;
+    background:#f1f5f9;
+    border:1px solid #d9e4ee;
+  }
+  .qr-sidebar .qr-box{
+    width:116px;height:116px;
+    display:flex;align-items:center;justify-content:center;
+    background:#fff;border-radius:8px;overflow:hidden;
+    border:1px solid #e2ecf2;
+    position:relative;
+    text-decoration:none;
+    cursor:pointer;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .qr-sidebar .qr-box:hover{
+    border-color:var(--brand2);
+    box-shadow:0 0 0 3px rgba(0,128,128,.15);
+  }
+  .qr-sidebar .qr-box img{
+    width:116px !important;
+    height:116px !important;
+    display:block !important;
+  }
+  .qr-sidebar .qr-box .qr-txt{
+    font-size:.7em;color:#8a96a3;text-align:center;padding:6px;
+  }
+  .qr-sidebar .scan-text{
+    font-size:.7em;color:var(--muted);font-weight:700;margin:0;
+    text-align:center;line-height:1.3;
+  }
+  .qr-sidebar .qr-contact-text{
+    font-size:.6em;
+    color:#5b6b7c;
+    text-align:center;
+    line-height:1.45;
+    margin-top:2px;
+    direction:rtl;
+    border-top:1px dashed #e2ecf2;
+    padding-top:4px;
+    width:100%;
+  }
+  .qr-sidebar .qr-contact-text > div{
+    margin-bottom:1px;
+    word-break:break-all;
+  }
+  .qr-sidebar .qr-contact-text .ltr{
+    direction:ltr;
+    font-variant-numeric:tabular-nums;
+  }
+  @media (max-width:1100px){
+    .qr-sidebar{display:none}
+  }
+
+  @media print{
+    .topbar{position:static}
+    .btn{display:none}
+    .qr-sidebar{display:none}
+    .page-title-banner .banner-inner{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= QR sidebar (left) — کارت تماس ================= -->
+<div class="qr-sidebar" aria-label="کارت تماس">
+  <img class="avatar"
+       src="https://raw.githubusercontent.com/mehajinezhad/ECG_Axis_Interpretation/main/img-FOs7otp21NneKmcQd3s2w.png"
+       alt="تصویر مدرس">
+  <a href="tel:+989173789811" class="qr-box" id="qrBox" title="تماس با مدرس" aria-label="برای تماس کلیک کنید"></a>
+  <p class="scan-text">مرا اسکن کن</p>
+  <div class="qr-contact-text">
+    <div>محمد اسماعیل حاجی‌نژاد</div>
+    <div class="ltr">+98 917 378 9811</div>
+    <div class="ltr">esmaielhajinezhad@gmail.com</div>
+  </div>
+</div>
+
+<!-- ================= عنوان بزرگ بالای صفحه ================= -->
+<div class="page-title-banner">
+  <div class="banner-inner">
+    <!-- نماد اتاق عمل: ماسک جراحی به‌عنوان واترمارک پس‌زمینه -->
+    <svg class="banner-symbol" viewBox="0 0 200 150" aria-hidden="true" focusable="false">
+      <g stroke="#ffffff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <!-- بدنه ماسک جراحی -->
+        <path d="M40 45 Q100 30 160 45 Q172 75 160 105 Q100 120 40 105 Q28 75 40 45 Z"/>
+        <!-- چین‌های افقی ماسک -->
+        <line x1="46" y1="60" x2="154" y2="60"/>
+        <line x1="42" y1="75" x2="158" y2="75"/>
+        <line x1="46" y1="90" x2="154" y2="90"/>
+        <!-- بند سمت چپ -->
+        <path d="M40 55 Q15 45 12 70 Q12 90 28 105"/>
+        <!-- بند سمت راست -->
+        <path d="M160 55 Q185 45 188 70 Q188 90 172 105"/>
+      </g>
+    </svg>
+    <h1>رشته کارشناسی هوشبری: کارآموزی بیهوشی</h1>
+    <p>تخمین میزان خونریزی حین عمل و تعیین حداکثر خونریزی مجاز بدون تجویز خون (ABL)</p>
+  </div>
+</div>
+
+<!-- ================= نوار پیشرفت ================= -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-title">تخمین خونریزی و محاسبه ABL</div>
+    <div class="progress"><i id="progressFill"></i></div>
+    <div class="pct" id="progressText">۰٪</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ================= VIEW: MAIN LESSON ================= -->
+  <div id="mainView">
+
+    <!-- ================= کارت سخن سر ویلیام اوسلر ================= -->
+    <section class="osler-card" id="oslerCard">
+      <div class="quote-mark">"</div>
+      <p class="osler-text" id="oslerText"></p>
+      <p class="osler-translation" id="oslerTrans"></p>
+      <div class="osler-author">— سر ویلیام اوسلر</div>
+    </section>
+
+    <!-- ================= سربرگ ================= -->
+    <section class="card hero">
+      <span class="tag">درس گام‌به‌گام · ویژه کارآموزان هوشبری</span>
+      <h1>تخمین میزان خونریزی حین عمل و تعیین حداکثر خونریزی مجاز بدون تجویز خون (ABL)</h1>
+      <p>
+        در این درس، در شش گام کوتاه یاد می‌گیرید حجم خون تخمینی بیمار را برآورد کنید،
+        حداکثر خونریزی مجاز (ABL) را حساب کنید، خونریزی حین عمل را با روش‌های عملی تخمین بزنید،
+        خطاهای کم‌برآورد و بیش‌برآورد را تشخیص دهید و در نهایت برای بیمار تصمیم بگیرید.
+      </p>
+
+      <div class="ecg-wrap" data-ecg="1">
+        <div class="ecg-cap">نوار قلب آموزشی — رسم‌شده با SVG روی کاغذ شطرنجی استاندارد (هر مربع کوچک ۱ میلی‌متر، هر مربع بزرگ ۵ میلی‌متر)</div>
+      </div>
+
+      <div class="badge-line">
+        <span class="badge">۶ گام تفسیری</span>
+        <span class="badge green">ماشین‌حساب ABL</span>
+        <span class="badge">۵ سناریوی پایانی</span>
+        <span class="badge red">ذخیره خودکار پیشرفت</span>
+      </div>
+
+      <div class="note">
+        <b>توجه:</b> همه بیماران و اعداد این درس <b>فرضی و آموزشی</b> هستند.
+        مقادیر مرجع (حجم خون بر کیلوگرم، حداقل هماتوکریت قابل قبول و آستانه‌های تصمیم‌گیری)
+        باید با پروتکل مرکز درمانی و نظر استاد تطبیق داده شوند.
+      </div>
+    </section>
+
+    <!-- ============================================================
+         گام ۱
+    ============================================================ -->
+    <section class="card">
+      <div class="step-head">
+        <div class="step">۱</div>
+        <h2 class="step-title">حجم خون تخمینی (EBV) و مفهوم ABL</h2>
+      </div>
+
+      <p>
+        برای اینکه بفهمیم یک بیمار «چقدر می‌تواند خون از دست بدهد»، اول باید بدانیم
+        کل حجم خون گردش خون او چقدر است. به این عدد <b>حجم خون تخمینی (EBV)</b> می‌گویند
+        و از روی وزن و گروه سنی/جنسی برآورد می‌شود.
+      </p>
+
+      <ul>
+        <li><b>مرد بزرگسال:</b> حدود ۷۰ میلی‌لیتر بر کیلوگرم</li>
+        <li><b>زن بزرگسال:</b> حدود ۶۵ میلی‌لیتر بر کیلوگرم</li>
+        <li><b>کودک:</b> حدود ۷۵ میلی‌لیتر بر کیلوگرم</li>
+        <li><b>نوزاد ترم:</b> حدود ۸۵ میلی‌لیتر بر کیلوگرم</li>
+      </ul>
+
+      <p class="note">
+        این ضرایب در منابع مختلف کمی متفاوت‌اند. عددی که در جلسه استفاده می‌شود باید
+        با پروتکل بخش هماهنگ شود.
+      </p>
+
+      <p>
+        حالا مفهوم <b>ABL</b> یا «حداکثر خونریزی مجاز بدون تجویز خون»:
+        حجمی از خون که اگر بیمار آن را از دست بدهد، هماتوکریت او به «کف قابل قبول» نمی‌رسد.
+      </p>
+
+      <div class="formula">
+        ABL = EBV × ( Hct₀ − Hct_min ) ÷ Hct₀
+        <span class="lbl">Hct₀ = هماتوکریت اولیه · Hct_min = حداقل هماتوکریت قابل قبول برای همین بیمار</span>
+      </div>
+
+      <p>
+        <b>حداقل هماتوکریت قابل قبول</b> یک عدد ثابت برای همه نیست. در یک بزرگسال سالم
+        معمولاً محدوده‌ای حدود ۲۴٪ (معادل هموگلوبین حدود ۸ گرم بر دسی‌لیتر) در نظر گرفته می‌شود،
+        اما در بیمار قلبی، کودک، یا بیمار با خونریزی فعال، این کف بالاتر و محافظه‌کارانه‌تر است.
+        عدد دقیق را باید استاد بر اساس راهنمای مرکز تأیید کند.
+      </p>
+
+      <div class="ecg-wrap" data-ecg="2">
+        <div class="ecg-cap">پایش قلبی حین عمل — تغییرات نوار قلب یکی از سرنخ‌های کم‌برآورد خونریزی است</div>
+      </div>
+
+      <h3>سناریوی نمونه</h3>
+      <p>
+        مرد ۷۰ کیلوگرمی، هماتوکریت اولیه ۴۲٪، حداقل هماتوکریت قابل قبول ۲۴٪.
+      </p>
+      <ul>
+        <li>EBV = ۷۰ × ۷۰ = <b>۴۹۰۰ میلی‌لیتر</b></li>
+        <li>کسر قابل تحمل = (۴۲ − ۲۴) ÷ ۴۲ = ۱۸ ÷ ۴۲ ≈ <b>۰٫۴۲۸۶</b></li>
+        <li>ABL = ۴۹۰۰ × ۰٫۴۲۸۶ ≈ <b>۲۱۰۰ میلی‌لیتر</b></li>
+      </ul>
+
+      <div class="quiz" data-id="q1"
+           data-explain="EBV برابر ۷۰×۷۰=۴۹۰۰ میلی‌لیتر است و کسر قابل تحمل (۴۲−۲۴)÷۴۲ ≈ ۰٫۴۲۸۶ می‌شود. حاصل ضرب این دو، حدود ۲۱۰۰ میلی‌لیتر است.">
+        <p class="qtext">پرسش خودآزمایی ۱ — در همین بیمار، ABL تقریباً چقدر است؟</p>
+        <button class="opt" data-ok="0">حدود ۱۰۰۰ میلی‌لیتر</button>
+        <button class="opt" data-ok="1">حدود ۲۱۰۰ میلی‌لیتر</button>
+        <button class="opt" data-ok="0">حدود ۳۰۰۰ میلی‌لیتر</button>
+        <button class="opt" data-ok="0">حدود ۴۹۰۰ میلی‌لیتر</button>
+        <div class="fb" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         گام ۲
+    ============================================================ -->
+    <section class="card">
+      <div class="step-head">
+        <div class="step">۲</div>
+        <h2 class="step-title">محاسبه گام‌به‌گام ABL</h2>
+      </div>
+
+      <p>محاسبه ABL همیشه چهار گام ثابت دارد. اگر این چهار گام را به ترتیب بروید، خطای محاسباتی به حداقل می‌رسد.</p>
+
+      <ol>
+        <li><b>گام ۱ — EBV:</b> وزن بیمار را در ضریب گروه خودش ضرب کنید.</li>
+        <li><b>گام ۲ — اختلاف:</b> Hct اولیه منهای Hct حداقل.</li>
+        <li><b>گام ۳ — کسر:</b> نتیجه گام ۲ را بر Hct اولیه تقسیم کنید.</li>
+        <li><b>گام ۴ — ABL:</b> کسر گام ۳ را در EBV ضرب کنید.</li>
+      </ol>
+
+      <div class="formula">
+        ABL = ( وزن × ضریب ) × [ ( Hct₀ − Hct_min ) ÷ Hct₀ ]
+      </div>
+
+      <h3>سناریوی نمونه</h3>
+      <p>زن ۶۰ کیلوگرمی، هماتوکریت اولیه ۳۶٪، حداقل هماتوکریت قابل قبول ۲۴٪.</p>
+      <ul>
+        <li>گام ۱: EBV = ۶۰ × ۶۵ = <b>۳۹۰۰ میلی‌لیتر</b></li>
+        <li>گام ۲: ۳۶ − ۲۴ = <b>۱۲</b></li>
+        <li>گام ۳: ۱۲ ÷ ۳۶ = <b>۰٫۳۳۳</b></li>
+        <li>گام ۴: ۳۹۰۰ × ۰٫۳۳۳ ≈ <b>۱۳۰۰ میلی‌لیتر</b></li>
+      </ul>
+
+      <div class="note">
+        اگر محاسبه را بر پایه هموگلوبین انجام دهید، ساختار فرمول دقیقاً یکی است؛
+        فقط جای Hct را Hb می‌گیرد. انتخاب مبنا (Hct یا Hb) باید در جلسه با استاد هماهنگ شود.
+      </div>
+
+      <div class="quiz" data-id="q2"
+           data-explain="کسر قابل تحمل = (۴۰−۲۴)÷۴۰ = ۱۶÷۴۰ = ۰٫۴۰. یعنی بیمار می‌تواند ۴۰ درصد حجم خونش را از دست بدهد تا هماتوکریت به کف برسد. سپس این کسر در EBV ضرب می‌شود.">
+        <p class="qtext">پرسش خودآزمایی ۲ — اگر Hct اولیه ۴۰٪ و حداقل قابل قبول ۲۴٪ باشد، کسر حجم خونی که می‌توان از دست داد چقدر است؟</p>
+        <button class="opt" data-ok="0">۰٫۲۴</button>
+        <button class="opt" data-ok="1">۰٫۴۰</button>
+        <button class="opt" data-ok="0">۰٫۶۰</button>
+        <button class="opt" data-ok="0">۰٫۱۶</button>
+        <div class="fb" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         گام ۳
+    ============================================================ -->
+    <section class="card">
+      <div class="step-head">
+        <div class="step">۳</div>
+        <h2 class="step-title">روش‌های تخمین خونریزی حین عمل</h2>
+      </div>
+
+      <p>ABL به ما می‌گوید «چقدر مجاز است». اما برای تصمیم‌گیری، باید بدانیم «چقدر خونریزی شده». اینجا پای تخمین خونریزی (EBL) وسط می‌آید.</p>
+
+      <h3>۱) تخمین چشمی</h3>
+      <p>
+        رایج‌ترین روش در اتاق عمل. نگاه کردن به گازها، خون روی شان و کف اتاق.
+        <b>مزیت:</b> سریع و بدون نیاز به تجهیزات. <b>محدودیت:</b> کم‌دقت‌ترین روش؛
+        در حجم‌های بالای خونریزی خطا بیشتر می‌شود و اغلب به سمت کم‌برآورد می‌رود.
+      </p>
+
+      <h3>۲) وزن‌سنجی گازها و اسفنج‌ها</h3>
+      <p>
+        وزن گازهای خونی منهای وزن گاز خشک منهای وزن مایع غیرخونی (مثل سالین).
+        <b>مزیت:</b> عینی‌تر و قابل ثبت. <b>محدودیت:</b> اگر وزن خشک یا مایع شستشو کسر نشود،
+        نتیجه دچار بیش‌برآورد می‌شود. تبخیر هم می‌تواند خطای کوچکی ایجاد کند.
+      </p>
+
+      <h3>۳) حجم ساکشن</h3>
+      <p>
+        حجم مایع جمع‌شده در ساکشن منهای حجم مایع شستشوی استفاده‌شده.
+        <b>مزیت:</b> برای خونریزی‌های بزرگ و مایع‌دار مناسب است.
+        <b>محدودیت:</b> بدون کسر مایع شستشو، خونریزی را به‌شدت بیشتر از واقع نشان می‌دهد.
+      </p>
+
+      <h3>۴) روش‌های مبتنی بر هموگلوبین/هماتوکریت سریال و رنگ‌سنجی</h3>
+      <p>
+        اندازه‌گیری‌های مکرر آزمایشگاهی یا روش‌های مبتنی بر غلظت هموگلوبین.
+        <b>مزیت:</b> نگاه به وضعیت واقعی بیمار. <b>محدودیت:</b> تأخیر زمانی دارد و
+        در خونریزی حاد و سریع، هماتوکریت تا زمان هم‌تعادلی مایعات، افت واقعی را نشان نمی‌دهد.
+      </p>
+
+      <div class="note">
+        <b>نکته کلیدی:</b> هیچ روشی «کامل» نیست. توصیه عملی این است که در هر مورد
+        <b>حداقل دو روش مستقل</b> (مثلاً وزن گاز + حجم ساکشن) ثبت و با هم مقایسه شود.
+      </div>
+
+      <h3>سناریوی نمونه</h3>
+      <p>
+        در یک جراحی، وزن گازهای خونی معادل ۹۰۰ میلی‌لیتر، حجم ساکشن پس از کسر مایع شستشو ۳۰۰ میلی‌لیتر،
+        و تخمین چشمی ۷۰۰ میلی‌لیتر است.
+      </p>
+      <ul>
+        <li>EBL بر پایه دو روش عینی: ۹۰۰ + ۳۰۰ = <b>۱۲۰۰ میلی‌لیتر</b></li>
+        <li>تخمین چشمی (۷۰۰) حدود ۵۰۰ میلی‌لیتر کمتر از دو روش عینی است ← کم‌برآورد</li>
+        <li>تصمیم: برای مقایسه با ABL، عدد <b>۱۲۰۰</b> مبنا قرار می‌گیرد، نه ۷۰۰.</li>
+      </ul>
+
+      <div class="quiz" data-id="q3"
+           data-explain="تخمین چشمی شایع‌ترین روش است، اما مطالعات و مرورها نشان می‌دهند دقت آن از همه کمتر است و در حجم‌های بالای خونریزی بیشتر دچار خطا می‌شود. وزن‌سنجی، ساکشن و روش‌های آزمایشگاهی — با وجود محدودیت‌های خودشان — دقت بیشتری دارند.">
+        <p class="qtext">پرسش خودآزمایی ۳ — کدام روش تخمین خونریزی، به‌طور کلی کم‌دقت‌ترین روش محسوب می‌شود؟</p>
+        <button class="opt" data-ok="0">وزن‌کردن گازهای خونی</button>
+        <button class="opt" data-ok="1">تخمین چشمی</button>
+        <button class="opt" data-ok="0">محاسبه بر پایه هموگلوبین سریال</button>
+        <button class="opt" data-ok="0">اندازه‌گیری حجم ساکشن با کسر مایع شستشو</button>
+        <div class="fb" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         گام ۴
+    ============================================================ -->
+    <section class="card">
+      <div class="step-head">
+        <div class="step">۴</div>
+        <h2 class="step-title">کم‌برآورد و بیش‌برآورد خونریزی: تشخیص و پیامد</h2>
+      </div>
+
+      <p>
+        خطای تخمین دو جهت دارد و هر دو خطرناک‌اند. یک راه ساده برای تشخیص:
+        عددی که به دست می‌آورید را با روش‌های عینی‌تر مقایسه کنید.
+      </p>
+
+      <h3>سناریوی نمونه</h3>
+      <p>
+        در یک جراحی مغز و اعصاب، وزن گازها ۱۲۰۰ میلی‌لیتر، حجم ساکشن پس از کسر شستشو ۶۰۰ میلی‌لیتر،
+        و تخمین چشمی ۱۰۰۰ میلی‌لیتر گزارش شده است.
+      </p>
+      <ul>
+        <li>EBL عینی: ۱۲۰۰ + ۶۰۰ = <b>۱۸۰۰ میلی‌لیتر</b></li>
+        <li>تخمین چشمی: ۱۰۰۰ میلی‌لیتر → <b>۸۰۰ میلی‌لیتر کم‌برآورد</b></li>
+        <li>پیامد بالقوه: تأخیر در احیاء، هیپوپرفیوژن بافتی، اسیدوز، اختلال انعقادی</li>
+      </ul>
+
+      <h3>مقایسه پیامدها</h3>
+      <div class="badge-line">
+        <span class="badge red">کم‌برآورد ← تأخیر در احیاء و هیپوپرفیوژن</span>
+        <span class="badge">بیش‌برآورد ← ترانسفوزیون غیرضروری</span>
+      </div>
+      <ul>
+        <li><b>کم‌برآورد:</b> تأخیر در احیاء، هیپوپرفیوژن، اسیدوز لاکتیک، اختلال انعقادی، آسیب اندام هدف.</li>
+        <li><b>بیش‌برآورد:</b> ترانسفوزیون غیرضروری و عوارض آن — واکنش‌های همولیتیک و آلرژیک، اضافه‌بار حجمی (TACO)، آسیب ریه مرتبط با ترانسفوزیون (TRALI).</li>
+      </ul>
+
+      <div class="ecg-wrap" data-ecg="3">
+        <div class="ecg-cap">نوار قلب — تاکی‌کاردی و تغییرات قطعه ST می‌تواند سرنخ کم‌خونی و هیپوپرفیوژن باشد</div>
+      </div>
+
+      <div class="quiz" data-id="q4"
+           data-explain="وقتی خونریزی را بیشتر از واقع تخمین می‌زنید، ممکن است خونی تجویز شود که بیمار به آن نیاز نداشته است. این ترانسفوزیون غیرضروری، بیمار را در معرض عوارض ترانسفوزیون قرار می‌دهد. سه گزینه دیگر پیامدهای کم‌برآورد هستند.">
+        <p class="qtext">پرسش خودآزمایی ۴ — کدام مورد از پیامدهای بیش‌برآورد خونریزی حین عمل است؟</p>
+        <button class="opt" data-ok="0">تأخیر در احیاء</button>
+        <button class="opt" data-ok="0">هیپوپرفیوژن بافتی</button>
+        <button class="opt" data-ok="1">ترانسفوزیون غیرضروری و عوارض مرتبط</button>
+        <button class="opt" data-ok="0">اسیدوز لاکتیک</button>
+        <div class="fb" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         گام ۵
+    ============================================================ -->
+    <section class="card">
+      <div class="step-head">
+        <div class="step">۵</div>
+        <h2 class="step-title">تصمیم‌گیری: مقایسه EBL با ABL</h2>
+      </div>
+
+      <p>
+        حالا دو عدد داریم: <b>EBL</b> (تخمین خونریزی رخ‌داده) و <b>ABL</b> (حد مجاز).
+        تصمیم بالینی از مقایسه این دو، <b>به‌همراه</b> ارزیابی بالینی و روند هماتوکریت/هموگلوبین به دست می‌آید.
+      </p>
+
+      <h3>یک قاعده ساده آموزشی</h3>
+      <ul>
+        <li><b>EBL کمتر از ۸۰٪ ABL:</b> در محدوده مجاز بدون تجویز خون — ادامه پایش.</li>
+        <li><b>EBL بین ۸۰٪ تا ۱۰۰٪ ABL:</b> ناحیه <b>مرزی</b> — نیاز به بازبینی، بررسی Hct/Hb حین عمل، علائم بالینی و آماده‌سازی برای اقدام.</li>
+        <li><b>EBL بیش از ABL:</b> عبور از حد مجاز — بررسی اندیکاسیون ترانسفوزیون و اقدام.</li>
+      </ul>
+
+      <p class="note">
+        این درصدها یک <b>قاعده ساده آموزشی</b> برای تمرین تصمیم‌گیری است، نه یک توصیه بالینی قطعی.
+        آستانه‌های واقعی باید بر اساس پروتکل مرکز و وضعیت هر بیمار تعیین شود.
+      </p>
+
+      <h3>سناریوی نمونه</h3>
+      <p>
+        همان زن ۶۰ کیلوگرمی با Hct اولیه ۳۶٪ و حداقل ۲۴٪ → ABL ≈ ۱۳۰۰ میلی‌لیتر.
+        خونریزی تخمینی حین عمل ≈ ۱۲۰۰ میلی‌لیتر (نسبت ≈ ۹۲٪).
+      </p>
+      <ul>
+        <li>این بیمار در ناحیه <b>مرزی</b> است.</li>
+        <li>تصمیم صرفاً بر پایه «کمتر از ABL بودن» کافی نیست.</li>
+        <li>باید Hct حین عمل، علائم حیاتی، دیورز و وضعیت بالینی بررسی شود.</li>
+      </ul>
+
+      <div class="quiz" data-id="q5"
+           data-explain="ABL یک حد راهنما است، نه یک مجوز قطعی. وقتی EBL به ABL نزدیک می‌شود (ناحیه مرزی)، تصمیم نهایی باید با ارزیابی بالینی، روند هماتوکریت/هموگلوبین و علائم بیمار گرفته شود، نه فقط با یک مقایسه ساده عددی.">
+        <p class="qtext">پرسش خودآزمایی ۵ — اگر ABL بیمار ۸۰۰ میلی‌لیتر و خونریزی تخمینی ۷۵۰ میلی‌لیتر باشد، تفسیر صحیح کدام است؟</p>
+        <button class="opt" data-ok="0">خونریزی از ABL گذشته و ترانسفوزیون قطعاً لازم است.</button>
+        <button class="opt" data-ok="1">خونریزی کمتر از ABL است، اما تصمیم نهایی باید با ارزیابی بالینی و روند Hct/Hb باشد.</button>
+        <button class="opt" data-ok="0">ABL دیگر اعتبار ندارد و باید کنار گذاشته شود.</button>
+        <button class="opt" data-ok="0">باید فوراً Hct را نادیده گرفت.</button>
+        <div class="fb" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         گام ۶
+    ============================================================ -->
+    <section class="card">
+      <div class="step-head">
+        <div class="step">۶</div>
+        <h2 class="step-title">سه اشتباه رایج دانشجویان</h2>
+      </div>
+
+      <h3>اشتباه ۱ — اتکای انحصاری به تخمین چشمی</h3>
+      <p>
+        تخمین چشمی شایع‌ترین روش است اما دقت پایینی دارد و در حجم‌های بالاتر خطایش بیشتر می‌شود.
+        دانشجویان اغلب عدد چشمی را بدون مقایسه با وزن‌سنجی یا ساکشن می‌پذیرند.
+        <b>اصلاح:</b> در هر مورد حداقل دو روش مستقل ثبت و مقایسه شود.
+      </p>
+
+      <h3>اشتباه ۲ — فراموش کردن کسر مایع غیرخونی</h3>
+      <p>
+        در وزن‌کردن گازها، اگر وزن گاز خشک و وزن مایع شستشو/سالین کسر نشود، خونریزی بیش‌برآورد می‌شود.
+        در ساکشن هم اگر حجم شستشو کسر نشود، همین خطا رخ می‌دهد.
+      </p>
+
+      <h3>سناریوی نمونه</h3>
+      <p>
+        گازهای خونی وزن‌سنجی‌شده: ۹۰۰ گرم. وزن خشک همان گازها: ۲۰۰ گرم. حجم سالین جذب‌شده در گازها: ۲۰۰ میلی‌لیتر
+        (معادل ۲۰۰ گرم). محاسبه نادرست: ۹۰۰ میلی‌لیتر خون.
+        محاسبه درست: ۹۰۰ − ۲۰۰ − ۲۰۰ = <b>۵۰۰ میلی‌لیتر</b>.
+      </p>
+      <p>
+        یعنی خطای کسر نکردن، خونریزی را حدود <b>۴۰۰ میلی‌لیتر بیش‌برآورد</b> کرده است.
+      </p>
+
+      <h3>اشتباه ۳ — تفسیر ABL به‌عنوان مجوز قطعی</h3>
+      <p>
+        ABL یک برآورد جمعیتی است، نه یک عدد قطعی برای یک بیمار خاص.
+        بیمار با Hct اولیه پایین، بیماری قلبی، خونریزی فعال یا کودک، حاشیه ایمنی کمتری دارد.
+        <b>اصلاح:</b> ABL باید در کنار Hct/Hb سریال، علائم حیاتی، دیورز، لاکتات و وضعیت بالینی تفسیر شود.
+      </p>
+
+      <div class="quiz" data-id="q6"
+           data-explain="در وزن‌سنجی گازها، عددی که ترازو نشان می‌دهد شامل خون + وزن خشک گاز + مایع شستشوست. اگر این دو مورد آخر کسر نشود، عدد نهایی بیشتر از واقعیت می‌شود؛ یعنی بیش‌برآورد. در ساکشن هم دقیقاً همین خطا با کسر نکردن حجم شستشو تکرار می‌شود.">
+        <p class="qtext">پرسش خودآزمایی ۶ — کدام خطا در روش وزن‌سنجی گازها باعث بیش‌برآورد خونریزی می‌شود؟</p>
+        <button class="opt" data-ok="0">تبخیر مایع از سطح گاز</button>
+        <button class="opt" data-ok="1">کسر نکردن وزن گاز خشک و وزن مایع شستشو</button>
+        <button class="opt" data-ok="0">وجود خونریزی مخفی در درن</button>
+        <button class="opt" data-ok="0">کم‌بودن تعداد گازهای خشک</button>
+        <div class="fb" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ماشین‌حساب ABL
+    ============================================================ -->
+    <section class="card" id="calculator">
+      <div class="step-head">
+        <div class="step" style="background:linear-gradient(145deg,#008080,#0f6e8c)">Σ</div>
+        <h2 class="step-title">ماشین‌حساب ABL</h2>
+      </div>
+
+      <p>
+        وزن، ضریب حجم خون، و هماتوکریت (یا هموگلوبین) اولیه و حداقل قابل قبول را وارد کنید
+        تا ABL به‌صورت گام‌به‌گام محاسبه شود. نتیجه در همین مرورگر ذخیره می‌ماند.
+      </p>
+
+      <div class="grid2">
+        <div class="field-wrap">
+          <label class="field" for="calcPreset">گروه بیمار</label>
+          <select id="calcPreset">
+            <option value="70">مرد بزرگسال — ۷۰ mL/kg</option>
+            <option value="65">زن بزرگسال — ۶۵ mL/kg</option>
+            <option value="75">کودک — ۷۵ mL/kg</option>
+            <option value="85">نوزاد ترم — ۸۵ mL/kg</option>
+            <option value="custom">سفارشی (خودم وارد می‌کنم)</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label class="field" for="calcWeight">وزن بیمار (کیلوگرم)</label>
+          <input type="number" id="calcWeight" inputmode="decimal" min="0.5" step="0.1" placeholder="مثلاً ۷۰">
+        </div>
+        <div class="field-wrap">
+          <label class="field" for="calcCoef">ضریب حجم خون (mL/kg)</label>
+          <input type="number" id="calcCoef" inputmode="decimal" min="1" step="1" value="70">
+        </div>
+        <div class="field-wrap">
+          <label class="field" for="calcBase">مبنای محاسبه</label>
+          <select id="calcBase">
+            <option value="hct">هماتوکریت (٪)</option>
+            <option value="hb">هموگلوبین (g/dL)</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label class="field" for="calcInit">مقدار اولیه</label>
+          <input type="number" id="calcInit" inputmode="decimal" step="0.1" placeholder="مثلاً ۴۲">
+        </div>
+        <div class="field-wrap">
+          <label class="field" for="calcMin">حداقل قابل قبول</label>
+          <input type="number" id="calcMin" inputmode="decimal" step="0.1" placeholder="مثلاً ۲۴">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="calcBtn">محاسبه ABL</button>
+        <button class="btn ghost" id="calcClear">پاک کردن</button>
+      </div>
+
+      <div class="result" id="calcResult" hidden></div>
+    </section>
+
+    <!-- ============================================================
+         دکمه ورود به تمرین نهایی
+    ============================================================ -->
+    <section class="card" style="text-align:center;border-color:#c6e0ea;background:linear-gradient(160deg,#ffffff,#f4fbfd)">
+      <h2 style="margin-bottom:8px">تمرین نهایی — پنج سناریو را خودت تفسیر کن</h2>
+      <p>
+        در این تمرین، پنج سناریوی بالینی با ترتیب تصادفی نمایش داده می‌شود.
+        ABL را حساب کن، تصمیم بگیر و بازخورد کامل بگیر.
+      </p>
+      <button class="btn" id="goPractice" style="font-size:1.05em;padding:14px 32px">ورود به تمرین نهایی</button>
+    </section>
+
+  </div><!-- /mainView -->
+
+  <!-- ============================================================
+       VIEW: PRACTICE
+  ============================================================ -->
+  <div id="practiceView" hidden>
+
+    <section class="card hero" style="margin-top:16px">
+      <div class="step-head">
+        <div class="step" style="background:linear-gradient(145deg,#c0392b,#e07b4f)">★</div>
+        <h2 class="step-title">تمرین نهایی — پنج سناریو را خودت تفسیر کن</h2>
+      </div>
+
+      <div class="ecg-wrap" data-ecg="4">
+        <div class="ecg-cap">نوار قلب آموزشی — پیش از تصمیم‌گیری نهایی، وضعیت قلبی بیمار را هم در نظر بگیر</div>
+      </div>
+
+      <p>
+        در هر سناریو، ابتدا <b>ABL</b> را حساب کن و در کادر بنویس (خطای تا ۱۰٪ پذیرفته می‌شود)،
+        سپس <b>تصمیم</b> خودت را انتخاب کن. بعد از بررسی، بازخورد کامل با شرح محاسبه نمایش داده می‌شود.
+      </p>
+
+      <div class="note">
+        همه اعداد فرضی و آموزشی هستند. حداقل هماتوکریت قابل قبول در هر سناریو داده شده است؛
+        در عمل این عدد بر اساس وضعیت بیمار و پروتکل مرکز تعیین می‌شود.
+      </div>
+
+      <div class="actions">
+        <button class="btn ghost" id="backToMain">← بازگشت به درس</button>
+        <button class="btn ghost" id="shuffleAgain">ترتیب تصادفی مجدد</button>
+      </div>
+    </section>
+
+    <div id="finalsContainer"></div>
+
+    <div class="actions" style="margin-top:24px">
+      <button class="btn ghost" id="backToMain2">← بازگشت به درس</button>
+      <button class="btn ghost" id="resetAll">پاک کردن پیشرفت و شروع دوباره</button>
+    </div>
+
+  </div><!-- /practiceView -->
+
+  <footer>
+    <strong>مدرس:</strong> دکتر محمد اسماعیل حاجی‌نژاد، دانشگاه علوم پزشکی بوشهر، گروه هوشبری
+  </footer>
+</div>
+
+<!-- ================= اسکریپت‌ها ================= -->
+<script>
+(function(){
+  'use strict';
+
+  /* ============================================================
+     ساخت QR — مخاطب تماس (vCard 3.0)
+  ============================================================ */
+  (function buildQR(){
+    var vcard = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      'N:حاجی‌نژاد;محمد اسماعیل;;;',
+      'FN:محمد اسماعیل حاجی‌نژاد',
+      'ORG:دانشگاه علوم پزشکی بوشهر',
+      'TITLE:دکتری آموزش پزشکی',
+      'TEL;TYPE=CELL:+989173789811',
+      'EMAIL;TYPE=WORK:esmaielhajinezhad@gmail.com',
+      'END:VCARD'
+    ].join('\r\n');
+
+    var box = document.getElementById('qrBox');
+    if(!box) return;
+
+    var qrImg = document.createElement('img');
+    qrImg.alt = 'QR Code — مرا اسکن کن';
+    qrImg.style.width = '116px';
+    qrImg.style.height = '116px';
+    qrImg.style.display = 'block';
+
+    var apiEndpoints = [
+      'https://api.qrserver.com/v1/create-qr-code/?size=232x232&margin=0&format=png&data=' + encodeURIComponent(vcard),
+      'https://quickchart.io/qr?text=' + encodeURIComponent(vcard) + '&size=232&margin=0&ecLevel=M',
+      'https://api.qrserver.com/v1/create-qr-code/?size=232x232&margin=1&data=' + encodeURIComponent(vcard)
+    ];
+
+    var currentApi = 0;
+
+    qrImg.onerror = function(){
+      currentApi++;
+      if(currentApi < apiEndpoints.length){
+        qrImg.src = apiEndpoints[currentApi];
+      }else{
+        tryFallbackLibrary();
+      }
+    };
+
+    qrImg.onload = function(){};
+
+    function tryFallbackLibrary(){
+      box.innerHTML = '';
+      var loader = document.createElement('div');
+      loader.className = 'qr-txt';
+      loader.textContent = 'در حال ساخت QR…';
+      box.appendChild(loader);
+
+      if(typeof QRCode !== 'undefined'){
+        try{
+          box.innerHTML = '';
+          new QRCode(box, {
+            text: vcard,
+            width: 232,
+            height: 232,
+            colorDark: '#16283a',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.L
+          });
+          var canvases = box.querySelectorAll('canvas');
+          canvases.forEach(function(c){ c.style.display = 'none'; });
+          return;
+        }catch(e){
+          console.error('qrcodejs error:', e);
+        }
+      }
+
+      box.innerHTML = '<div class="qr-txt" style="font-size:.62em;padding:4px">' +
+        'QR در دسترس نیست<br>از اطلاعات زیر استفاده کنید' +
+        '</div>';
+    }
+
+    qrImg.src = apiEndpoints[0];
+    box.appendChild(qrImg);
+  })();
+
+  /* ============================================================
+     سخنان سر ویلیام اوسلر — تصادفی + ترجمه فارسی
+  ============================================================ */
+  var OSLER_QUOTES = [
+    {
+      en: "The practice of medicine is an art, not a trade; a calling, not a business; a calling in which your heart will be exercised equally with your head.",
+      fa: "پزشکی یک هنر است، نه یک تجارت؛ یک رسالت است، نه یک کسب‌وکار؛ رسالتی که در آن قلب شما به همان اندازه ذهن‌تان به کار گرفته می‌شود."
+    },
+    {
+      en: "Medicine is a science of uncertainty and an art of probability.",
+      fa: "پزشکی علمی است آمیخته با عدم قطعیت و هنری است بر پایه احتمال."
+    },
+    {
+      en: "The good physician treats the disease; the great physician treats the patient who has the disease.",
+      fa: "پزشک خوب، بیماری را درمان می‌کند؛ پزشک بزرگ، بیماری را که به آن بیماری مبتلاست درمان می‌کند."
+    },
+    {
+      en: "Listen to your patient, he is telling you the diagnosis.",
+      fa: "به بیمار خود گوش فرا ده؛ او دارد تشخیص را برای تو می‌گوید."
+    },
+    {
+      en: "Observe, record, tabulate, communicate. Use your five senses. Learn to see, learn to hear, learn to feel, learn to smell, and know that by practice alone you can become expert.",
+      fa: "مشاهده کن، ثبت کن، جدول‌بندی کن، ارتباط برقرار کن. از پنج حس خود استفاده کن. یاد بگیر ببینی، یاد بگیر بشنوی، یاد بگیر لمس کنی، یاد بگیر ببویی، و بدان که فقط با تمرین می‌توانی متخصص شوی."
+    },
+    {
+      en: "The best preparation for tomorrow is to do today's work superbly well.",
+      fa: "بهترین آمادگی برای فردا، انجام عالی کار امروز است."
+    },
+    {
+      en: "Medicine is learned by the bedside and not in the classroom.",
+      fa: "پزشکی در کنار تخت بیمار آموخته می‌شود، نه در کلاس درس."
+    },
+    {
+      en: "There is no more difficult art to acquire than the art of observation.",
+      fa: "هیچ هنری سخت‌تر از هنر مشاهده به دست نمی‌آید."
+    },
+    {
+      en: "To study the phenomena of disease without books is to sail an uncharted sea, while to study books without patients is not to go to sea at all.",
+      fa: "مطالعه پدیده‌های بیماری بدون کتاب، مانند دریانوردی در دریایی ناشناخته است، و مطالعه کتاب بدون بیمار، اصلاً به دریا رفتن نیست."
+    },
+    {
+      en: "A physician who treats himself has a fool for a patient.",
+      fa: "پزشکی که خودش را درمان می‌کند، یک احمق را به عنوان بیمار دارد."
+    },
+    {
+      en: "The value of experience is not in seeing much, but in seeing wisely.",
+      fa: "ارزش تجربه در دیدن چیزهای زیاد نیست، در دیدن عاقلانه است."
+    },
+    {
+      en: "Care more particularly for the individual patient than for the special features of the disease.",
+      fa: "بیش از ویژگی‌های خاص بیماری، به بیمار به عنوان یک فرد اهمیت بده."
+    },
+    {
+      en: "The greater the ignorance, the greater the dogmatism.",
+      fa: "هر چه نادانی بیشتر باشد، جزم‌گرایی بیشتر است."
+    },
+    {
+      en: "Look wise, say nothing, and grunt. Speech was given to conceal thought.",
+      fa: "عاقل به نظر برس، چیزی نگو، و فقط همهمه کن. سخن برای پنهان کردن اندیشه به ما داده شده است."
+    }
+  ];
+
+  (function pickOslerQuote(){
+    var el = document.getElementById('oslerText');
+    var tr = document.getElementById('oslerTrans');
+    if(!el || !tr) return;
+    var q = OSLER_QUOTES[Math.floor(Math.random() * OSLER_QUOTES.length)];
+    el.textContent = '"' + q.en + '"';
+    tr.textContent = q.fa;
+  })();
+
+  /* ============================================================
+     وضعیت و ذخیره‌سازی
+  ============================================================ */
+  var KEY = 'abl-course-v2';
+
+  var state = (function(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){
+        var s = JSON.parse(raw);
+        if(s && typeof s === 'object'){
+          s.quizzes = s.quizzes || {};
+          s.finals  = s.finals  || {};
+          return s;
+        }
+      }
+    }catch(e){ /* نادیده گرفتن خطای خواندن */ }
+    return { quizzes:{}, finals:{}, calc:null };
+  })();
+
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ /* حافظه در دسترس نیست */ }
+  }
+
+  /* ============================================================
+     ابزارهای عددی و متنی
+  ============================================================ */
+  var FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+
+  function toEn(s){
+    if(s === null || s === undefined) return '';
+    return String(s)
+      .replace(/[۰-۹]/g, function(d){ return String(FA_DIGITS.indexOf(d)); })
+      .replace(/[٠-٩]/g, function(d){ return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); })
+      .replace(/[٬،]/g, '')
+      .replace(/٫/g, '.');
+  }
+
+  function faNum(n, dec){
+    if(typeof n !== 'number' || !isFinite(n)) return '—';
+    var d = (dec === undefined) ? 0 : dec;
+    var s = n.toFixed(d);
+    var parts = s.split('.');
+    var intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '٬');
+    var out = parts.length > 1 ? intPart + '٫' + parts[1] : intPart;
+    return out.replace(/\d/g, function(x){ return FA_DIGITS[+x]; });
+  }
+
+  function round10(n){ return Math.round(n / 10) * 10; }
+
+  /* ============================================================
+     ساخت نوار قلب SVG روی کاغذ شطرنجی
+  ============================================================ */
+  var ecgUid = 0;
+
+  function buildECG(container){
+    var W = 600, H = 100;
+    var base = 62;
+    var beatWidth = 100;
+    var uid = 'ecg' + (ecgUid++);
+
+    var pattern = [
+      [0,0],[10,0],[14,-2],[18,-7],[22,-2],[26,0],[32,0],
+      [35,2],[38,-22],[41,10],[44,0],[50,0],
+      [56,-3],[62,-9],[68,-3],[74,0],[84,0],[100,0]
+    ];
+
+    var pts = [];
+    for(var x = 0; x < W; x += beatWidth){
+      for(var i = 0; i < pattern.length; i++){
+        var px = pattern[i][0], py = pattern[i][1];
+        var X = x + px;
+        var Y = base + py;
+        if(X <= W){
+          pts.push(X.toFixed(1) + ',' + Y.toFixed(1));
+        }
+      }
+    }
+
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('class', 'ecg-svg');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'نوار قلب آموزشی روی کاغذ شطرنجی استاندارد');
+
+    svg.innerHTML =
+      '<defs>' +
+        '<pattern id="' + uid + 's" width="5" height="5" patternUnits="userSpaceOnUse">' +
+          '<path d="M5 0 L0 0 0 5" fill="none" stroke="#f9d3d9" stroke-width="0.4"/>' +
+        '</pattern>' +
+        '<pattern id="' + uid + 'b" width="25" height="25" patternUnits="userSpaceOnUse">' +
+          '<rect width="25" height="25" fill="url(#' + uid + 's)"/>' +
+          '<path d="M25 0 L0 0 0 25" fill="none" stroke="#e8a2b0" stroke-width="0.9"/>' +
+        '</pattern>' +
+      '</defs>' +
+      '<rect width="' + W + '" height="' + H + '" fill="#fffbfb"/>' +
+      '<rect width="' + W + '" height="' + H + '" fill="url(#' + uid + 'b)"/>' +
+      '<polyline fill="none" stroke="#c0392b" stroke-width="1.8" ' +
+        'stroke-linejoin="round" stroke-linecap="round" points="' + pts.join(' ') + '"/>';
+
+    container.insertBefore(svg, container.firstChild);
+  }
+
+  document.querySelectorAll('[data-ecg]').forEach(function(el){
+    buildECG(el);
+  });
+
+  /* ============================================================
+     مدیریت پرسش‌های چهارگزینه‌ای
+  ============================================================ */
+  var quizEls = Array.prototype.slice.call(document.querySelectorAll('.quiz'));
+
+  quizEls.forEach(function(quiz){
+    var id = quiz.getAttribute('data-id');
+    var opts = Array.prototype.slice.call(quiz.querySelectorAll('.opt'));
+    var fb = quiz.querySelector('.fb');
+    var explain = quiz.getAttribute('data-explain') || '';
+    var correctOpt = opts.filter(function(o){ return o.getAttribute('data-ok') === '1'; })[0];
+    var correctText = correctOpt ? correctOpt.textContent.trim() : '';
+
+    function render(chosenIndex, isOk){
+      opts.forEach(function(o, j){
+        o.disabled = true;
+        o.classList.remove('ok', 'bad');
+        if(o.getAttribute('data-ok') === '1'){
+          o.classList.add('ok');
+        }
+        if(j === chosenIndex && !isOk){
+          o.classList.add('bad');
+        }
+      });
+
+      fb.hidden = false;
+      fb.className = 'fb ' + (isOk ? 'ok' : 'bad');
+
+      var head = isOk
+        ? '<strong>✅ آفرین! پاسخ درست است.</strong> '
+        : '<strong>❌ پاسخ درست نیست.</strong> گزینه صحیح: «' + correctText + '». ';
+
+      fb.innerHTML = head + '<br>' + explain;
+    }
+
+    opts.forEach(function(opt, idx){
+      opt.addEventListener('click', function(){
+        if(opt.disabled) return;
+        var isOk = opt.getAttribute('data-ok') === '1';
+        state.quizzes[id] = { i: idx, ok: isOk };
+        save();
+        render(idx, isOk);
+        updateProgress();
+      });
+    });
+
+    if(state.quizzes[id]){
+      render(state.quizzes[id].i, !!state.quizzes[id].ok);
+    }
+  });
+
+  /* ============================================================
+     ماشین‌حساب ABL
+  ============================================================ */
+  var presetEl  = document.getElementById('calcPreset');
+  var weightEl  = document.getElementById('calcWeight');
+  var coefEl    = document.getElementById('calcCoef');
+  var baseEl    = document.getElementById('calcBase');
+  var initEl    = document.getElementById('calcInit');
+  var minEl     = document.getElementById('calcMin');
+  var calcBtn   = document.getElementById('calcBtn');
+  var calcClear = document.getElementById('calcClear');
+  var calcRes   = document.getElementById('calcResult');
+
+  presetEl.addEventListener('change', function(){
+    if(presetEl.value !== 'custom'){
+      coefEl.value = presetEl.value;
+    }
+  });
+
+  coefEl.addEventListener('input', function(){
+    var v = coefEl.value;
+    var matched = false;
+    Array.prototype.forEach.call(presetEl.options, function(op){
+      if(op.value === v) matched = true;
+    });
+    if(!matched) presetEl.value = 'custom';
+  });
+
+  baseEl.addEventListener('change', function(){
+    var isHct = (baseEl.value === 'hct');
+    initEl.placeholder = isHct ? 'مثلاً ۴۲' : 'مثلاً ۱۴';
+    minEl.placeholder  = isHct ? 'مثلاً ۲۴' : 'مثلاً ۸';
+  });
+
+  function showCalcError(msg){
+    calcRes.hidden = false;
+    calcRes.innerHTML = '<span class="warn">⚠ ' + msg + '</span>';
+  }
+
+  function calcABL(){
+    var w = parseFloat(toEn(weightEl.value));
+    var k = parseFloat(toEn(coefEl.value));
+    var a = parseFloat(toEn(initEl.value));
+    var b = parseFloat(toEn(minEl.value));
+    var base = baseEl.value;
+
+    if(!isFinite(w) || w <= 0){ showCalcError('وزن بیمار را به‌درستی وارد کنید (بزرگ‌تر از صفر).'); return; }
+    if(!isFinite(k) || k <= 0){ showCalcError('ضریب حجم خون را به‌درستی وارد کنید.'); return; }
+    if(!isFinite(a) || a <= 0){ showCalcError('مقدار اولیه (هماتوکریت یا هموگلوبین) را وارد کنید.'); return; }
+    if(!isFinite(b) || b <= 0){ showCalcError('حداقل مقدار قابل قبول را وارد کنید.'); return; }
+    if(b >= a){ showCalcError('حداقل قابل قبول باید کمتر از مقدار اولیه باشد. اگر برابر یا بیشتر است، مفهوم ABL معنا ندارد.'); return; }
+
+    var ebv   = w * k;
+    var diff  = a - b;
+    var frac  = diff / a;
+    var abl   = ebv * frac;
+    var unit  = (base === 'hct') ? '٪' : 'g/dL';
+    var sym   = (base === 'hct') ? 'Hct' : 'Hb';
+
+    var low  = abl * 0.9;
+    var high = abl * 1.1;
+
+    calcRes.hidden = false;
+    calcRes.innerHTML =
+      '<span style="font-size:.85em;color:#5b6b7c">حداکثر خونریزی مجاز (ABL) — برآورد</span>' +
+      '<span class="big">' + faNum(round10(abl), 0) + ' میلی‌لیتر</span>' +
+
+      '<div class="row"><span>گام ۱ — حجم خون تخمینی (EBV)</span><span>' + faNum(w, 1) + ' × ' + faNum(k, 0) + ' = ' + faNum(round10(ebv), 0) + ' mL</span></div>' +
+      '<div class="row"><span>گام ۲ — اختلاف ' + sym + '</span><span>' + faNum(a, 1) + ' − ' + faNum(b, 1) + ' = ' + faNum(diff, 1) + ' ' + unit + '</span></div>' +
+      '<div class="row"><span>گام ۳ — کسر قابل تحمل</span><span>' + faNum(diff, 1) + ' ÷ ' + faNum(a, 1) + ' = ' + faNum(frac, 4) + '</span></div>' +
+      '<div class="row"><span>گام ۴ — ABL</span><span>' + faNum(round10(ebv), 0) + ' × ' + faNum(frac, 4) + ' ≈ ' + faNum(round10(abl), 0) + ' mL</span></div>' +
+      '<div class="row"><span>محدوده با احتساب خطای ۱۰٪</span><span>' + faNum(round10(low), 0) + ' تا ' + faNum(round10(high), 0) + ' mL</span></div>' +
+
+      '<p style="margin-top:12px;font-size:.9em;color:#5b6b7c">' +
+        'این عدد یک <b>برآورد</b> است. در ناحیه مرزی (حدود ۸۰٪ تا ۱۰۰٪ ABL) تصمیم نهایی باید با ' +
+        'ارزیابی بالینی، روند ' + sym + ' و وضعیت بیمار گرفته شود.' +
+      '</p>';
+
+    state.calc = {
+      preset: presetEl.value,
+      w: weightEl.value,
+      k: coefEl.value,
+      base: baseEl.value,
+      a: initEl.value,
+      b: minEl.value
+    };
+    save();
+  }
+
+  calcBtn.addEventListener('click', calcABL);
+
+  calcClear.addEventListener('click', function(){
+    weightEl.value = '';
+    initEl.value = '';
+    minEl.value = '';
+    coefEl.value = '70';
+    presetEl.value = '70';
+    baseEl.value = 'hct';
+    initEl.placeholder = 'مثلاً ۴۲';
+    minEl.placeholder  = 'مثلاً ۲۴';
+    calcRes.hidden = true;
+    calcRes.innerHTML = '';
+    state.calc = null;
+    save();
+  });
+
+  if(state.calc){
+    presetEl.value = state.calc.preset || 'custom';
+    weightEl.value = state.calc.w || '';
+    coefEl.value   = state.calc.k || '70';
+    baseEl.value   = state.calc.base || 'hct';
+    initEl.value   = state.calc.a || '';
+    minEl.value    = state.calc.b || '';
+    if(baseEl.value === 'hb'){
+      initEl.placeholder = 'مثلاً ۱۴';
+      minEl.placeholder  = 'مثلاً ۸';
+    }
+    if(weightEl.value && initEl.value && minEl.value){
+      calcABL();
+    }
+  }
+
+  /* ============================================================
+     سناریوهای پایانی — داده‌ها
+  ============================================================ */
+  var FINALS_DATA = [
+    {
+      id: 'f1',
+      title: 'جراحی مغز و اعصاب',
+      desc: 'مرد ۸۰ کیلوگرمی. هماتوکریت اولیه ۴۰٪، حداقل هماتوکریت قابل قبول ۲۷٪. حین عمل: وزن گازهای خونی (پس از کسر وزن خشک و مایع شستشو) معادل ۱۲۰۰ میلی‌لیتر، حجم ساکشن پس از کسر مایع شستشو ۶۰۰ میلی‌لیتر، و تخمین چشمی ۱۰۰۰ میلی‌لیتر.',
+      abl: 1820,
+      dec: 'border',
+      explain: 'EBV = ۸۰ × ۷۰ = ۵۶۰۰ میلی‌لیتر. کسر = (۴۰−۲۷)÷۴۰ = ۱۳÷۴۰ = ۰٫۳۲۵. ABL = ۵۶۰۰ × ۰٫۳۲۵ = ۱۸۲۰ میلی‌لیتر. EBL عینی = ۱۲۰۰ + ۶۰۰ = ۱۸۰۰ میلی‌لیتر، یعنی حدود ۹۹٪ ABL. این بیمار در ناحیه مرزی است و نمی‌توان با اطمینان گفت «مجاز»؛ نیاز به بازبینی، بررسی Hct حین عمل و آماده‌سازی برای اقدام دارد. اتکا به تخمین چشمی (۱۰۰۰) اینجا خونریزی را کم‌برآورد می‌کرد.'
+    },
+    {
+      id: 'f2',
+      title: 'جراحی قلب',
+      desc: 'زن ۷۵ کیلوگرمی. هماتوکریت اولیه ۳۸٪، حداقل هماتوکریت قابل قبول ۲۵٪. حین عمل: حجم ساکشن پس از کسر مایع شستشو ۱۵۰۰ میلی‌لیتر، وزن گازهای خونی ۵۰۰ میلی‌لیتر، تخمین چشمی ۱۲۰۰ میلی‌لیتر. هماتوکریت حین عمل به ۲۸٪ رسیده است.',
+      abl: 1668,
+      dec: 'over',
+      explain: 'EBV = ۷۵ × ۶۵ = ۴۸۷۵ میلی‌لیتر. کسر = (۳۸−۲۵)÷۳۸ = ۱۳÷۳۸ ≈ ۰٫۳۴۲۱. ABL = ۴۸۷۵ × ۰٫۳۴۲۱ ≈ ۱۶۶۸ میلی‌لیتر. EBL عینی = ۱۵۰۰ + ۵۰۰ = ۲۰۰۰ میلی‌لیتر که از ABL گذشته است. هماتوکریت حین عمل هم به ۲۸٪ رسیده و به کف قابل قبول نزدیک شده است. این بیمار از محدوده مجاز عبور کرده و نیاز به بررسی اندیکاسیون ترانسفوزیون و اقدام دارد.'
+    },
+    {
+      id: 'f3',
+      title: 'جراحی گوش و حلق کودک',
+      desc: 'کودک ۲۰ کیلوگرمی. هماتوکریت اولیه ۳۵٪، حداقل هماتوکریت قابل قبول ۲۵٪. حین عمل: وزن گازهای خونی ۲۰۰ میلی‌لیتر، حجم ساکشن پس از کسر مایع شستشو ۱۰۰ میلی‌لیتر، تخمین چشمی ۱۵۰ میلی‌لیتر.',
+      abl: 429,
+      dec: 'ok',
+      explain: 'EBV = ۲۰ × ۷۵ = ۱۵۰۰ میلی‌لیتر. کسر = (۳۵−۲۵)÷۳۵ = ۱۰÷۳۵ ≈ ۰٫۲۸۵۷. ABL = ۱۵۰۰ × ۰٫۲۸۵۷ ≈ ۴۲۹ میلی‌لیتر. EBL عینی = ۲۰۰ + ۱۰۰ = ۳۰۰ میلی‌لیتر، یعنی حدود ۷۰٪ ABL. این بیمار در محدوده مجاز بدون تجویز خون است. با این حال چون حجم مطلق در کودک کم است و خطای تخمین نسبتاً بزرگ‌تر می‌شود، پایش نزدیک و وزن‌سنجی دقیق توصیه می‌شود.'
+    },
+    {
+      id: 'f4',
+      title: 'تروما با خونریزی مخفی',
+      desc: 'مرد ۸۵ کیلوگرمی با کم‌خونی نسبی قبل از عمل. هماتوکریت اولیه ۳۴٪، حداقل هماتوکریت قابل قبول ۲۶٪. حین عمل: وزن گازهای خونی ۷۰۰ میلی‌لیتر، حجم ساکشن پس از کسر مایع شستشو ۵۰۰ میلی‌لیتر، تخمین چشمی ۶۰۰ میلی‌لیتر. درن زیرجلدی نیز ترشح خونی دارد و احتمال خونریزی مخفی وجود دارد.',
+      abl: 1400,
+      dec: 'border',
+      explain: 'EBV = ۸۵ × ۷۰ = ۵۹۵۰ میلی‌لیتر. کسر = (۳۴−۲۶)÷۳۴ = ۸÷۳۴ ≈ ۰٫۲۳۵۳. ABL = ۵۹۵۰ × ۰٫۲۳۵۳ ≈ ۱۴۰۰ میلی‌لیتر. EBL آشکار = ۷۰۰ + ۵۰۰ = ۱۲۰۰ میلی‌لیتر، یعنی حدود ۸۶٪ ABL — در ناحیه مرزی. علاوه بر این، خونریزی مخفی در درن زیرجلدی هم وجود دارد که در EBL آشکار لحاظ نشده است. بیمار با هماتوکریت اولیه پایین‌تر (۳۴٪) حاشیه ایمنی کمتری دارد و باید با احتیاط بیشتری ارزیابی شود.'
+    },
+    {
+      id: 'f5',
+      title: 'جراحی عمومی',
+      desc: 'مرد ۷۰ کیلوگرمی. هماتوکریت اولیه ۴۲٪، حداقل هماتوکریت قابل قبول ۲۴٪. حین عمل: وزن گازهای خونی ۶۰۰ میلی‌لیتر، حجم ساکشن پس از کسر مایع شستشو ۴۰۰ میلی‌لیتر، تخمین چشمی ۵۰۰ میلی‌لیتر.',
+      abl: 2100,
+      dec: 'ok',
+      explain: 'EBV = ۷۰ × ۷۰ = ۴۹۰۰ میلی‌لیتر. کسر = (۴۲−۲۴)÷۴۲ = ۱۸÷۴۲ ≈ ۰٫۴۲۸۶. ABL = ۴۹۰۰ × ۰٫۴۲۸۶ ≈ ۲۱۰۰ میلی‌لیتر. EBL عینی = ۶۰۰ + ۴۰۰ = ۱۰۰۰ میلی‌لیتر، یعنی حدود ۴۸٪ ABL. این بیمار با فاصله زیاد در محدوده مجاز بدون تجویز خون قرار دارد؛ ادامه پایش کافی است.'
+    }
+  ];
+
+  var DEC_LABEL = {
+    'ok': 'مجاز بدون تجویز خون',
+    'border': 'مرزی — نیاز به بازبینی',
+    'over': 'فراتر از ABL — اقدام'
+  };
+
+  /* ============================================================
+     ساخت DOM سناریوهای پایانی
+  ============================================================ */
+  function buildFinalCard(d){
+    var wrapper = document.createElement('div');
+    wrapper.className = 'card final-q';
+    wrapper.setAttribute('data-id', d.id);
+    wrapper.setAttribute('data-abl', d.abl);
+    wrapper.setAttribute('data-dec', d.dec);
+    wrapper.setAttribute('data-explain', d.explain);
+
+    wrapper.innerHTML =
+      '<h3>سناریو — ' + d.title + '</h3>' +
+      '<p>' + d.desc + '</p>' +
+      '<div class="grid2">' +
+        '<div class="field-wrap">' +
+          '<label class="field" for="' + d.id + '-abl">ABL محاسبه‌شده شما (میلی‌لیتر)</label>' +
+          '<input type="number" id="' + d.id + '-abl" class="fin-abl" inputmode="decimal" placeholder="مثلاً ۱۸۰۰">' +
+        '</div>' +
+        '<div class="field-wrap">' +
+          '<label class="field" for="' + d.id + '-dec">تصمیم شما</label>' +
+          '<select id="' + d.id + '-dec" class="fin-dec">' +
+            '<option value="">— انتخاب کنید —</option>' +
+            '<option value="ok">مجاز بدون تجویز خون</option>' +
+            '<option value="border">مرزی — نیاز به بازبینی</option>' +
+            '<option value="over">فراتر از ABL — اقدام</option>' +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      '<div class="actions"><button class="btn check-fin">بررسی پاسخ</button></div>' +
+      '<div class="fb" hidden></div>';
+
+    return wrapper;
+  }
+
+  function wireFinalCard(q){
+    var id      = q.getAttribute('data-id');
+    var abl     = parseFloat(q.getAttribute('data-abl'));
+    var correct = q.getAttribute('data-dec');
+    var explain = q.getAttribute('data-explain') || '';
+    var input   = q.querySelector('.fin-abl');
+    var select  = q.querySelector('.fin-dec');
+    var fb      = q.querySelector('.fb');
+    var btn     = q.querySelector('.check-fin');
+
+    function showFeedback(okA, okD){
+      fb.hidden = false;
+      var good = okA && okD;
+      fb.className = 'fb ' + (good ? 'ok' : 'bad');
+
+      var head;
+      if(good){
+        head = '<strong>✅ هر دو بخش درست است.</strong> ';
+      }else if(okA && !okD){
+        head = '<strong>❌ محاسبه درست بود، اما تصمیم درست نیست.</strong> ';
+      }else if(!okA && okD){
+        head = '<strong>❌ تصمیم درست بود، اما محاسبه ABL درست نیست.</strong> ';
+      }else{
+        head = '<strong>❌ پاسخ کامل نیست.</strong> ';
+      }
+
+      var msgA = okA
+        ? 'محاسبه ABL شما در محدوده قابل قبول (±۱۰٪) است. '
+        : 'ABL صحیح حدود <strong>' + faNum(round10(abl), 0) + ' میلی‌لیتر</strong> است. ';
+
+      var msgD = okD
+        ? 'تصمیم شما هم درست است. '
+        : 'تصمیم درست: <strong>' + DEC_LABEL[correct] + '</strong>. ';
+
+      fb.innerHTML = head + '<br>' + msgA + msgD + '<br>' + explain;
+    }
+
+    function lockAndShow(okA, okD){
+      input.disabled = true;
+      select.disabled = true;
+      btn.disabled = true;
+      btn.textContent = 'بررسی شد';
+      showFeedback(okA, okD);
+    }
+
+    btn.addEventListener('click', function(){
+      var rawVal = parseFloat(toEn(input.value));
+
+      if(!isFinite(rawVal)){
+        fb.hidden = false;
+        fb.className = 'fb bad';
+        fb.innerHTML = '<strong>⚠ مقدار ABL را وارد کنید.</strong>';
+        return;
+      }
+      if(!select.value){
+        fb.hidden = false;
+        fb.className = 'fb bad';
+        fb.innerHTML = '<strong>⚠ یک تصمیم انتخاب کنید.</strong>';
+        return;
+      }
+
+      var okA = Math.abs(rawVal - abl) <= (abl * 0.10);
+      var okD = (select.value === correct);
+
+      state.finals[id] = {
+        v: input.value,
+        d: select.value,
+        okA: okA,
+        okD: okD,
+        ok: (okA && okD)
+      };
+      save();
+
+      lockAndShow(okA, okD);
+      updateProgress();
+    });
+
+    if(state.finals[id]){
+      var s = state.finals[id];
+      input.value = s.v;
+      select.value = s.d;
+      lockAndShow(!!s.okA, !!s.okD);
+    }
+  }
+
+  /* ============================================================
+     ساخت و رندر تصادفی تمرین نهایی
+  ============================================================ */
+  var finalsContainer = document.getElementById('finalsContainer');
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function renderFinals(){
+    if(!finalsContainer) return;
+    finalsContainer.innerHTML = '';
+    var shuffled = shuffle(FINALS_DATA);
+    shuffled.forEach(function(d){
+      var card = buildFinalCard(d);
+      finalsContainer.appendChild(card);
+      wireFinalCard(card);
+    });
+  }
+
+  /* ============================================================
+     جابه‌جایی بین درس و تمرین
+  ============================================================ */
+  var mainView = document.getElementById('mainView');
+  var practiceView = document.getElementById('practiceView');
+  var goPractice = document.getElementById('goPractice');
+  var backToMain = document.getElementById('backToMain');
+  var backToMain2 = document.getElementById('backToMain2');
+  var shuffleAgain = document.getElementById('shuffleAgain');
+
+  function showPractice(){
+    mainView.hidden = true;
+    practiceView.hidden = false;
+    renderFinals();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if(location.hash !== '#practice'){
+      history.replaceState(null, '', '#practice');
+    }
+  }
+
+  function showMain(){
+    practiceView.hidden = true;
+    mainView.hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if(location.hash === '#practice'){
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  }
+
+  if(goPractice){
+    goPractice.addEventListener('click', showPractice);
+  }
+  if(backToMain){
+    backToMain.addEventListener('click', showMain);
+  }
+  if(backToMain2){
+    backToMain2.addEventListener('click', showMain);
+  }
+  if(shuffleAgain){
+    shuffleAgain.addEventListener('click', function(){
+      renderFinals();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  /* ============================================================
+     پیشرفت
+  ============================================================ */
+  function updateProgress(){
+    var total = quizEls.length + FINALS_DATA.length;
+    var done = 0;
+
+    quizEls.forEach(function(q){
+      if(state.quizzes[q.getAttribute('data-id')]) done++;
+    });
+    FINALS_DATA.forEach(function(d){
+      if(state.finals[d.id]) done++;
+    });
+
+    var pct = total ? Math.round((done / total) * 100) : 0;
+
+    var fill = document.getElementById('progressFill');
+    var text = document.getElementById('progressText');
+    if(fill) fill.style.width = pct + '%';
+    if(text) text.textContent = faNum(pct, 0) + '٪';
+  }
+
+  /* ============================================================
+     بازنشانی
+  ============================================================ */
+  var resetBtn = document.getElementById('resetAll');
+  if(resetBtn){
+    resetBtn.addEventListener('click', function(){
+      var ok = window.confirm('همه پاسخ‌ها، نتیجه ماشین‌حساب و پیشرفت ذخیره‌شده پاک شود؟');
+      if(!ok) return;
+
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      window.location.reload();
+    });
+  }
+
+  /* ============================================================
+     راه‌اندازی اولیه
+  ============================================================ */
+  updateProgress();
+
+  // اگر آدرس شامل #practice باشد، مستقیم وارد تمرین شو
+  if(location.hash === '#practice'){
+    showPractice();
+  }
+
+})();
+</script>
+</body>
+</html>
